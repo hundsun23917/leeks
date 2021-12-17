@@ -1,10 +1,12 @@
 package bean;
 
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 
 public class CoinBean {
-    static DecimalFormat decimalFormat = new DecimalFormat("#.00");
+    static DecimalFormat decimalFormat = new DecimalFormat("#.##");
 
     private String symbol;
     private double regularMarketPrice;
@@ -77,7 +79,8 @@ public class CoinBean {
 
     /**
      * 返回列名的VALUE 用作展示
-     * @param colums 字段名
+     *
+     * @param colums   字段名
      * @param colorful 隐蔽模式
      * @return 对应列名的VALUE值 无法匹配返回""
      */
@@ -88,7 +91,7 @@ public class CoinBean {
             case "涨跌":
                 return String.valueOf(this.getRegularMarketChange());
             case "涨跌幅":
-                return decimalFormat.format(this.getRegularMarketChangePercent())+"%";
+                return decimalFormat.format(this.getRegularMarketChangePercent()) + "%";
             case "最高价":
                 return String.valueOf(this.getRegularMarketDayHigh());
             case "最低价":
@@ -96,12 +99,7 @@ public class CoinBean {
             case "当前价":
                 return String.valueOf(this.getRegularMarketPrice());
             case "更新时间":
-                String timeStr = "--";
-                if (this.getTimeStamp()>0){
-                    timeStr = String.valueOf(this.getTimeStamp());
-                }
-                return timeStr;
-
+                return LocalDateTime.now().format(DateTimeFormatter.ofPattern("YYYY-MM-dd HH:mm:ss"));
             default:
                 return "";
 

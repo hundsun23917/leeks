@@ -104,6 +104,8 @@ public class TencentStockHandler extends StockRefreshHandler {
 
     private void parse(String result) {
         String[] lines = result.split("\n");
+        BigDecimal totalMarketValue = BigDecimal.ZERO;
+        BigDecimal totalCost = BigDecimal.ZERO;
         for (String line : lines) {
             String code = line.substring(line.indexOf("_") + 1, line.indexOf("="));
             String dataStr = line.substring(line.indexOf("=") + 2, line.length() - 2);
@@ -130,14 +132,31 @@ public class TencentStockHandler extends StockRefreshHandler {
 
                 String bondStr = bean.getBonds();
                 if (StringUtils.isNotEmpty(bondStr)) {
+                    hasPosition = true;
                     BigDecimal bondDec = new BigDecimal(bondStr);
                     BigDecimal incomeDec = incomeDiff.multiply(bondDec)
                             .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal marketValue = bondDec.multiply(now);
+                    BigDecimal cost = bondDec.multiply(costPriceDec);
+                    bean.setMarketValue(marketValue.toString());
+                    bean.setCost(cost.toString());
                     bean.setIncome(incomeDec.toString());
+                    totalCost = cost.add(totalCost);
+                    totalMarketValue = marketValue.add(totalMarketValue);
                 }
             }
 
             updateData(bean);
+        }
+        if(hasPosition){
+            //计算总和收益
+            StockBean totalStockBean = new StockBean("total");
+            totalStockBean.setCost(totalCost.toString());
+            totalStockBean.setMarketValue(totalMarketValue.toString());
+            BigDecimal totalIncome = totalMarketValue.subtract(totalCost);
+            totalStockBean.setIncome(totalIncome.toString());
+            totalStockBean.setIncomePercent(totalIncome.divide(totalCost,2,RoundingMode.HALF_UP).toString());
+            updateData(totalStockBean);
         }
     }
 

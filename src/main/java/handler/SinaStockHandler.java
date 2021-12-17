@@ -83,6 +83,8 @@ public class SinaStockHandler extends StockRefreshHandler {
 
     public void handleResponse(String response, Map<String, String[]> codeMap) {
         List<String> refreshTimeList = new ArrayList<>();
+        BigDecimal totalMarketValue = BigDecimal.ZERO;
+        BigDecimal totalCost = BigDecimal.ZERO;
         for (String line : response.split("\n")) {
             Matcher matcher = DEFAULT_STOCK_PATTERN.matcher(line);
             if (!matcher.matches()) {
@@ -122,17 +124,33 @@ public class SinaStockHandler extends StockRefreshHandler {
 
                 String bondStr = bean.getBonds();
                 if (StringUtils.isNotEmpty(bondStr)) {
+                    hasPosition = true;
                     BigDecimal bondDec = new BigDecimal(bondStr);
                     BigDecimal incomeDec = incomeDiff.multiply(bondDec)
                             .setScale(2, RoundingMode.HALF_UP);
+                    BigDecimal marketValue = bondDec.multiply(now);
+                    BigDecimal cost = bondDec.multiply(costPriceDec);
+                    bean.setMarketValue(marketValue.toString());
+                    bean.setCost(cost.toString());
                     bean.setIncome(incomeDec.toString());
+                    totalCost = cost.add(totalCost);
+                    totalMarketValue = marketValue.add(totalMarketValue);
                 }
             }
 
             updateData(bean);
             refreshTimeList.add(split[31]);
         }
-
+        if(hasPosition){
+            //计算总和收益
+            StockBean totalStockBean = new StockBean("total");
+            totalStockBean.setCost(totalCost.toString());
+            totalStockBean.setMarketValue(totalMarketValue.toString());
+            BigDecimal totalIncome = totalMarketValue.subtract(totalCost);
+            totalStockBean.setIncome(totalIncome.toString());
+            totalStockBean.setIncomePercent(totalIncome.divide(totalCost,4,RoundingMode.HALF_UP).toString());
+            updateData(totalStockBean);
+        }
         String text = refreshTimeList.stream().sorted().findFirst().orElse("");
         SwingUtilities.invokeLater(() -> refreshTimeLabel.setText(text));
     }

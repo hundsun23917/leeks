@@ -24,8 +24,9 @@ public class StockBean {
      */
     private String min;
 
+    private String marketValue;
     private String costPrise;//成本价
-//    private String cost;//成本
+    private String cost;//成本
     private String bonds;//持仓
     private String incomePercent;//收益率
     private String income;//收益
@@ -147,13 +148,13 @@ public class StockBean {
         this.bonds = bonds;
     }
 
-    //    public String getCost() {
-//        return cost;
-//    }
-//
-//    public void setCost(String cost) {
-//        this.cost = cost;
-//    }
+        public String getCost() {
+        return cost;
+    }
+
+    public void setCost(String cost) {
+        this.cost = cost;
+    }
 
     public String getIncomePercent() {
         return incomePercent;
@@ -169,6 +170,14 @@ public class StockBean {
 
     public void setIncome(String income) {
         this.income = income;
+    }
+
+    public String getMarketValue() {
+        return marketValue;
+    }
+
+    public void setMarketValue(String marketValue) {
+        this.marketValue = marketValue;
     }
 
     @Override
@@ -216,6 +225,10 @@ public class StockBean {
                 return this.getMax();
             case "最低价":
                 return this.getMin();
+            case "市值":
+                return this.getMarketValue();
+            case "成本":
+                return this.getCost();
             case "成本价":
                 return this.getCostPrise();
             case "持仓":
@@ -225,9 +238,13 @@ public class StockBean {
             case "收益":
                 return this.getIncome();
             case "更新时间":
-                String timeStr = "--";
-                if (this.getTime() != null) {
-                    timeStr = this.getTime().substring(8);
+                String timeStr = this.getTime();
+                if (timeStr == null) {
+                    timeStr = "--";
+                }
+                String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+                if (timeStr.startsWith(today)) {
+                    timeStr = timeStr.substring(timeStr.indexOf(" "));
                 }
                 return timeStr;
             default:

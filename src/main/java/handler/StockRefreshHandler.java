@@ -24,6 +24,7 @@ public abstract class StockRefreshHandler extends DefaultTableModel {
      */
     public int codeColumnIndex;
 
+    public boolean hasPosition = false;
     private JTable table;
     private boolean colorful = true;
 

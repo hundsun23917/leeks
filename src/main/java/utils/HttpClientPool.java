@@ -47,7 +47,7 @@ public class HttpClientPool {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(100, TimeUnit.SECONDS);
         connectionManager.setMaxTotal(200);// 连接池
         connectionManager.setDefaultMaxPerRoute(100);// 每条通道的并发连接数
-        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(2000).setSocketTimeout(2000).build();
+        RequestConfig requestConfig = RequestConfig.custom().setConnectionRequestTimeout(5000).setSocketTimeout(5000).build();
         HttpClientBuilder httpClientBuilder = HttpClients.custom().setConnectionManager(connectionManager);
         if (proxyStr!=null && !proxyStr.isEmpty()){
             String[] s = proxyStr.split(":");
